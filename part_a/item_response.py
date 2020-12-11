@@ -35,8 +35,7 @@ def get_theta_deriv(theta, beta):
     theta_deriv = np.zeros(N)
     for i in range(N):
         theta_vector = np.full(D, theta[i])
-        exp = np.exp(theta_vector - beta)
-        inner = np.ones(D) - (exp/(np.ones(D) + exp))
+        inner = np.ones(D) - sigmoid(theta_vector - beta)
         theta_deriv[i] = np.sum(inner)
     return theta_deriv
 
@@ -46,8 +45,7 @@ def get_beta_deriv(theta, beta):
     beta_deriv = np.zeros(D)
     for i in range(D):
         beta_vector = np.full(N, beta[i])
-        exp = np.exp(theta - beta_vector)
-        inner = (exp / (np.ones(N) + exp)) - np.ones(N)
+        inner = sigmoid(theta - beta_vector) - 1
         beta_deriv[i] = np.sum(inner)
     return beta_deriv
 
