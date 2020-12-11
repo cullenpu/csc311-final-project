@@ -1,5 +1,5 @@
-from utils import *
-
+from csc311_final_project.utils import *
+from pdb import set_trace
 import numpy as np
 
 
@@ -14,21 +14,42 @@ def neg_log_likelihood(data, theta, beta):
 
     You may optionally replace the function arguments to receive a matrix.
 
+    :param sparse: A 542*1774 sparse matrix representing the data
     :param data: A dictionary {user_id: list, question_id: list,
     is_correct: list}
-    :param theta: Vector
-    :param beta: Vector
+    :param theta: Vector representing the ability of student i
+    :param beta: Vector representing the difficulty of problem j
     :return: float
     """
-    #####################################################################
-    # TODO:                                                             #
-    # Implement the function as described in the docstring.             #
-    #####################################################################
-    log_lklihood = 0.
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
-    return -log_lklihood
+    log_like = 0.
+    for i in range(len(theta)):
+        for j in range(len(beta)):
+            diff = theta[i] - beta[j]
+            inner_sum = diff - np.log((1 + np.exp(diff)))
+            log_like += inner_sum
+    return -log_like
+
+
+def get_theta_deriv(theta, beta):
+    N, D = len(theta), len(beta)
+    theta_deriv = np.zeros(N)
+    for i in range(N):
+        theta_vector = np.full(D, theta[i])
+        exp = np.exp(theta_vector - beta)
+        inner = np.ones(D) - (exp/(np.ones(D) + exp))
+        theta_deriv[i] = np.sum(inner)
+    return theta_deriv
+
+
+def get_beta_deriv(theta, beta):
+    N, D = len(theta), len(beta)
+    beta_deriv = np.zeros(D)
+    for i in range(D):
+        beta_vector = np.full(N, beta[i])
+        exp = np.exp(theta - beta_vector)
+        inner = (exp / (np.ones(N) + exp)) - np.ones(N)
+        beta_deriv[i] = np.sum(inner)
+    return beta_deriv
 
 
 def update_theta_beta(data, lr, theta, beta):
@@ -48,18 +69,13 @@ def update_theta_beta(data, lr, theta, beta):
     :param beta: Vector
     :return: tuple of vectors
     """
-    #####################################################################
-    # TODO:                                                             #
-    # Implement the function as described in the docstring.             #
-    #####################################################################
-    pass
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
+    for i in range(10):
+        theta = theta - lr * get_theta_deriv(theta, beta)
+        beta = beta - lr * get_beta_deriv(theta, beta)
     return theta, beta
 
 
-def irt(data, val_data, lr, iterations):
+def irt(sparse_matrix, data, val_data, lr, iterations):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
@@ -72,9 +88,8 @@ def irt(data, val_data, lr, iterations):
     :param iterations: int
     :return: (theta, beta, val_acc_lst)
     """
-    # TODO: Initialize theta and beta.
-    theta = None
-    beta = None
+    theta = np.zeros(sparse_matrix.shape[0])
+    beta = np.zeros(sparse_matrix.shape[1])
 
     val_acc_lst = []
 
@@ -120,7 +135,7 @@ def main():
     # Tune learning rate and number of iterations. With the implemented #
     # code, report the validation and test accuracy.                    #
     #####################################################################
-    pass
+    irt(sparse_matrix, train_data, val_data, 0.1, 10)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
