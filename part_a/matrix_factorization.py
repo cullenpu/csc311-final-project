@@ -2,7 +2,7 @@ from utils import *
 from scipy.linalg import sqrtm
 
 import numpy as np
-from pdb import set_trace
+import matplotlib.pyplot as plt
 
 
 def svd_reconstruct(matrix, k):
@@ -100,25 +100,31 @@ def als(train_data, k, lr, num_iteration):
     :param k: int
     :param lr: float
     :param num_iteration: int
-    :return: 2D reconstructed Matrix.
+    :return: 2D reconstructed Matrix, list of squared error every 1000 iterations
     """
     # Initialize u and z
     u = np.random.uniform(low=0, high=1 / np.sqrt(k),
                           size=(len(set(train_data["user_id"])), k))
     z = np.random.uniform(low=0, high=1 / np.sqrt(k),
                           size=(len(set(train_data["question_id"])), k))
-
+    loss = []
     #####################################################################
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
     #####################################################################
     for i in range(num_iteration):
         u, z = update_u_z(train_data, lr, u, z)
+        if i % 10000 == 0:
+            print("num iter: " + str(i))
+            sel = squared_error_loss(train_data, u, z)
+            loss.append(sel)
+            print("loss: " + str(sel))
+
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
     mat = u @ np.transpose(z)
-    return mat
+    return mat, loss
 
 
 def main():
@@ -165,12 +171,31 @@ def main():
     #     test_result = (sparse_matrix_evaluate(val_data, result))
     #     print(test_result)
 
-    k_vals = [1, 5, 10, 20, 50, 100]
-    for k in k_vals:
-        print("k: " + str(k))
-        result = als(train_data, k, 0.01, 500000)
-        test_result = (sparse_matrix_evaluate(val_data, result))
-        print(test_result)
+    # choose k=20
+    # k_vals = [1, 5, 10, 20, 50, 100]
+    # for k in k_vals:
+    #     print("k: " + str(k))
+    #     result = als(train_data, k, 0.01, 500000)
+    #     test_result = (sparse_matrix_evaluate(val_data, result))
+    #     print(test_result)
+
+    # final runs
+    predictions, train_loss = als(train_data, 20, 0.01, 500000)
+    val_mat, val_loss = als(val_data, 20, 0.01, 500000)
+    iters_range = np.arange(1, 500001, 10000)
+    plt.plot(iters_range, train_loss, color='red', label="training")
+    plt.plot(iters_range, val_loss, color='blue', label="validation")
+    plt.xlabel("num iterations")
+    plt.ylabel("squared error loss")
+    plt.legend()
+
+    train_acc = sparse_matrix_evaluate(train_data, predictions)
+    val_acc = sparse_matrix_evaluate(val_data, predictions)
+    test_acc = sparse_matrix_evaluate(test_data, predictions)
+
+    print("training accuracy: " + str(train_acc))
+    print("validation accuracy: " + str(val_acc))
+    print("test accuracy: " + str(test_acc))
 
     #####################################################################
     #                       END OF YOUR CODE                            #
