@@ -1,4 +1,4 @@
-from csc311_final_project.utils import *
+from utils import *
 from scipy.linalg import sqrtm
 
 import numpy as np
@@ -81,17 +81,13 @@ def update_u_z(train_data, lr, u, z):
     correct = train_data["is_correct"][i]
     user = train_data["user_id"][i]
     question = train_data["question_id"][i]
-    weights = lr * np.eye(len(u[0]))
 
-    for i in range(n):
-        first = np.linalg.inv(np.dot(z[question], np.transpose(z[question])) + weights)
-        second = np.dot(correct, z[question])
-        u[i] = first @ second
+    inner = correct - np.transpose(u[user]) @ z[question]
+    u_update = lr * inner * z[question]
+    u[user] = u[user] + u_update
 
-    for j in range(m):
-        first = np.linalg.inv(np.dot(u[user], np.transpose(u[user])) + weights)
-        second = np.dot(correct, u[user])
-        u[i] = first @ second
+    z_update = lr * inner * u[user]
+    z[question] = z[question] + z_update
 
     return u, z
 
@@ -116,12 +112,12 @@ def als(train_data, k, lr, num_iteration):
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
     #####################################################################
-    mat = None
     for i in range(num_iteration):
         u, z = update_u_z(train_data, lr, u, z)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
+    mat = u @ np.transpose(z)
     return mat
 
 
@@ -155,7 +151,27 @@ def main():
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    als(train_data, 5, 0.01, 10)
+    # num_iterations = [10000, 50000, 100000, 200000, 500000, 1000000, 1250000, 1500000]
+    # for num_iters in num_iterations:
+    #     print("num iterations: " + str(num_iters))
+    #     result = als(train_data, 5, 0.01, num_iters)
+    #     test_result = (sparse_matrix_evaluate(val_data, result))
+    #     print(test_result)
+
+    # learning_rates = [0.001, 0.005, 0.01, 0.03, 0.05, 0.1, 0.2]
+    # for lr in learning_rates:
+    #     print("learning rate: " + str(lr))
+    #     result = als(train_data, 5, lr, 500000)
+    #     test_result = (sparse_matrix_evaluate(val_data, result))
+    #     print(test_result)
+
+    k_vals = [1, 5, 10, 20, 50, 100]
+    for k in k_vals:
+        print("k: " + str(k))
+        result = als(train_data, k, 0.01, 500000)
+        test_result = (sparse_matrix_evaluate(val_data, result))
+        print(test_result)
+
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
