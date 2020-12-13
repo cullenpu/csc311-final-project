@@ -1,7 +1,8 @@
-from utils import *
+from csc311_final_project.utils import *
 from scipy.linalg import sqrtm
 
 import numpy as np
+from pdb import set_trace
 
 
 def svd_reconstruct(matrix, k):
@@ -74,15 +75,24 @@ def update_u_z(train_data, lr, u, z):
     # Implement the function as described in the docstring.             #
     #####################################################################
     # Randomly select a pair (user_id, question_id).
-    i = \
-        np.random.choice(len(train_data["question_id"]), 1)[0]
+    n, m = u.shape[0], z.shape[0]
 
-    c = train_data["is_correct"][i]
-    n = train_data["user_id"][i]
-    q = train_data["question_id"][i]
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
+    i = np.random.choice(len(train_data["question_id"]), 1)[0]
+    correct = train_data["is_correct"][i]
+    user = train_data["user_id"][i]
+    question = train_data["question_id"][i]
+    weights = lr * np.eye(len(u[0]))
+
+    for i in range(n):
+        first = np.linalg.inv(np.dot(z[question], np.transpose(z[question])) + weights)
+        second = np.dot(correct, z[question])
+        u[i] = first @ second
+
+    for j in range(m):
+        first = np.linalg.inv(np.dot(u[user], np.transpose(u[user])) + weights)
+        second = np.dot(correct, u[user])
+        u[i] = first @ second
+
     return u, z
 
 
@@ -107,6 +117,8 @@ def als(train_data, k, lr, num_iteration):
     # Implement the function as described in the docstring.             #
     #####################################################################
     mat = None
+    for i in range(num_iteration):
+        u, z = update_u_z(train_data, lr, u, z)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
@@ -124,17 +136,26 @@ def main():
     # (SVD) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    pass
+    # k_vals = [1, 5, 10, 20, 50, 100]
+    # results = []
+    # for k in k_vals:
+    #     result_matrix = svd_reconstruct(train_matrix, k)
+    #     results.append(sparse_matrix_evaluate(val_data, result_matrix))
+    # print(results)
+    #
+    # result_matrix = svd_reconstruct(train_matrix, 5)
+    # test_result = (sparse_matrix_evaluate(test_data, result_matrix))
+    # print(test_result)
+
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
-
     #####################################################################
     # TODO:                                                             #
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    pass
+    als(train_data, 5, 0.01, 10)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
