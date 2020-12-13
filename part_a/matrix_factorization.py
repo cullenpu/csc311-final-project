@@ -92,7 +92,7 @@ def update_u_z(train_data, lr, u, z):
     return u, z
 
 
-def als(train_data, k, lr, num_iteration):
+def als(train_data, valid_data, k, lr, num_iteration):
     """ Performs ALS algorithm. Return reconstructed matrix.
 
     :param train_data: A dictionary {user_id: list, question_id: list,
@@ -107,7 +107,8 @@ def als(train_data, k, lr, num_iteration):
                           size=(len(set(train_data["user_id"])), k))
     z = np.random.uniform(low=0, high=1 / np.sqrt(k),
                           size=(len(set(train_data["question_id"])), k))
-    loss = []
+    train_losses = []
+    val_losses = []
     #####################################################################
     # TODO:                                                             #
     # Implement the function as described in the docstring.             #
@@ -117,14 +118,18 @@ def als(train_data, k, lr, num_iteration):
         if i % 10000 == 0:
             print("num iter: " + str(i))
             sel = squared_error_loss(train_data, u, z)
-            loss.append(sel)
-            print("loss: " + str(sel))
+            train_losses.append(sel)
+            print("train loss: " + str(sel))
+            sel = squared_error_loss(valid_data, u, z)
+            val_losses.append(sel)
+            print("valid loss: " + str(sel))
+
 
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
     mat = u @ np.transpose(z)
-    return mat, loss
+    return mat, train_losses, val_losses
 
 
 def main():
@@ -180,14 +185,17 @@ def main():
     #     print(test_result)
 
     # final runs
-    predictions, train_loss = als(train_data, 20, 0.01, 500000)
-    val_mat, val_loss = als(val_data, 20, 0.01, 500000)
-    iters_range = np.arange(1, 500001, 10000)
+    predictions, train_loss, val_loss = als(train_data, val_data, 20, 0.01, 500000)
+    print(len(train_loss))
+    iters_range = np.arange(0, 500000, 10000)
+    print(len(iters_range))
     plt.plot(iters_range, train_loss, color='red', label="training")
     plt.plot(iters_range, val_loss, color='blue', label="validation")
     plt.xlabel("num iterations")
     plt.ylabel("squared error loss")
+    plt.title("Squared Error Loss vs. Iterations")
     plt.legend()
+    plt.show()
 
     train_acc = sparse_matrix_evaluate(train_data, predictions)
     val_acc = sparse_matrix_evaluate(val_data, predictions)
