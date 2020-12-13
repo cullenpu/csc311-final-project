@@ -1,4 +1,4 @@
-from csc311_final_project.utils import *
+from utils import *
 from pdb import set_trace
 import numpy as np
 
@@ -9,42 +9,25 @@ def sigmoid(x):
     return np.exp(x) / (1 + np.exp(x))
 
 
-def neg_log_likelihood(sparse, theta, beta):
+def neg_log_likelihood(data, theta, beta):
     """ Compute the negative log-likelihood.
 
     You may optionally replace the function arguments to receive a matrix.
 
-    :param sparse: A 542*1774 sparse matrix representing the data
+    :param data: A dictionary {user_id: list, question_id: list,
+    is_correct: list}
     :param theta: Vector representing the ability of student i
     :param beta: Vector representing the difficulty of problem j
     :return: float
     """
-    N, M = len(theta), len(beta)
-    theta_matrix = np.reshape(theta, (N, 1)) * np.ones((N, M))
-    beta_matrix = np.transpose(np.reshape(beta, (M, 1)) * np.ones((M, N)))
-    result = sparse.multiply((theta_matrix - beta_matrix) - np.log(1 + np.exp(theta_matrix - beta_matrix)))
-    log_like = np.nansum(result.data)
-    return log_like
+    log_like = 0
+    for i, c in enumerate(data['is_correct']):
+        curr_theta = theta[data['user_id'][i]]
+        curr_beta = beta[data['question_id'][i]]
 
-
-def get_theta_deriv(theta, beta):
-    N, D = len(theta), len(beta)
-    theta_deriv = np.zeros(N)
-    for i in range(N):
-        theta_vector = np.full(D, theta[i])
-        inner = np.ones(D) - sigmoid(theta_vector - beta)
-        theta_deriv[i] = np.sum(inner)
-    return theta_deriv
-
-
-def get_beta_deriv(theta, beta):
-    N, D = len(theta), len(beta)
-    beta_deriv = np.zeros(D)
-    for i in range(D):
-        beta_vector = np.full(N, beta[i])
-        inner = sigmoid(theta - beta_vector) - 1
-        beta_deriv[i] = np.sum(inner)
-    return beta_deriv
+        diff = curr_theta - curr_beta
+        log_like += (c * diff) - np.log(1 + np.exp(diff))
+    return -log_like
 
 
 def update_theta_beta(data, lr, theta, beta):
@@ -64,18 +47,25 @@ def update_theta_beta(data, lr, theta, beta):
     :param beta: Vector
     :return: tuple of vectors
     """
-    for i in range(10):
-        theta = theta - lr * get_theta_deriv(theta, beta)
-        beta = beta - lr * get_beta_deriv(theta, beta)
+    theta_deriv = np.zeros(theta.shape[0])
+    beta_deriv = np.zeros(beta.shape[0])
+    for i, c in enumerate(data['is_correct']):
+        curr_theta = theta[data['user_id'][i]]
+        curr_beta = beta[data['question_id'][i]]
+
+        theta_deriv[data['user_id'][i]] += c - sigmoid(curr_theta - curr_beta)
+        beta_deriv[data['question_id'][i]] += sigmoid(curr_theta - curr_beta) - c
+
+    theta = theta - (lr * theta_deriv)
+    beta = beta - (lr * beta_deriv)
     return theta, beta
 
 
-def irt(sparse, data, val_data, lr, iterations):
+def irt(data, val_data, lr, iterations):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
 
-    :param sparse: A 542*1774 sparse matrix representing the data
     :param data: A dictionary {user_id: list, question_id: list,
     is_correct: list}
     :param val_data: A dictionary {user_id: list, question_id: list,
@@ -84,13 +74,13 @@ def irt(sparse, data, val_data, lr, iterations):
     :param iterations: int
     :return: (theta, beta, val_acc_lst)
     """
-    theta = np.zeros(sparse.shape[0])
-    beta = np.zeros(sparse.shape[1])
+    theta = np.zeros(542)
+    beta = np.zeros(1774)
 
     val_acc_lst = []
 
     for i in range(iterations):
-        neg_lld = neg_log_likelihood(sparse, theta=theta, beta=beta)
+        neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
         score = evaluate(data=val_data, theta=theta, beta=beta)
         val_acc_lst.append(score)
         print("NLLK: {} \t Score: {}".format(neg_lld, score))
@@ -131,7 +121,7 @@ def main():
     # Tune learning rate and number of iterations. With the implemented #
     # code, report the validation and test accuracy.                    #
     #####################################################################
-    irt(sparse_matrix, train_data, val_data, 0.1, 10)
+    irt(train_data, val_data, 0.05, 100)
     #####################################################################
     #                       END OF YOUR CODE                            #
     #####################################################################
