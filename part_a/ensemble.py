@@ -1,5 +1,6 @@
 from utils import *
 import numpy as np
+from matrix_factorization import *
 
 
 def generate_resamples(data, m):
@@ -19,8 +20,20 @@ def main():
     train_data = load_train_csv("../data")
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
-    resamples = generate_resamples(train_data, 3)
-    print("hi")
+    m = 3       # generate 3 resamples
+    resamples = generate_resamples(train_data, m)
+    predictions = []
+    for i in range(m):
+        print("m = " + str(i))
+        pred, train_loss, val_loss = als(resamples[i], val_data, 20, 0.01, 500000, calculate_losses=False)
+        predictions.append(pred)
+    avg = sum(predictions) / m
+    train_acc = sparse_matrix_evaluate(train_data, avg)
+    val_acc = sparse_matrix_evaluate(val_data, avg)
+    test_acc = sparse_matrix_evaluate(test_data, avg)
+    print("training accuracy: " + str(train_acc))
+    print("validation accuracy: " + str(val_acc))
+    print("test accuracy: " + str(test_acc))
 
 
 if __name__ == "__main__":

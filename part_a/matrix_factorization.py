@@ -92,7 +92,7 @@ def update_u_z(train_data, lr, u, z):
     return u, z
 
 
-def als(train_data, valid_data, k, lr, num_iteration):
+def als(train_data, valid_data, k, lr, num_iteration, calculate_losses=True):
     """ Performs ALS algorithm. Return reconstructed matrix.
 
     :param train_data: A dictionary {user_id: list, question_id: list,
@@ -115,15 +115,16 @@ def als(train_data, valid_data, k, lr, num_iteration):
     #####################################################################
     for i in range(num_iteration):
         u, z = update_u_z(train_data, lr, u, z)
-        if i % 10000 == 0:
-            print("num iter: " + str(i))
-            sel = squared_error_loss(train_data, u, z)
-            train_losses.append(sel)
-            print("train loss: " + str(sel))
-            sel = squared_error_loss(valid_data, u, z)
-            val_losses.append(sel)
-            print("valid loss: " + str(sel))
 
+        if calculate_losses:
+            if i % 10000 == 0:
+                print("num iter: " + str(i))
+                sel = squared_error_loss(train_data, u, z)
+                train_losses.append(sel)
+                print("train loss: " + str(sel))
+                sel = squared_error_loss(valid_data, u, z)
+                val_losses.append(sel)
+                print("valid loss: " + str(sel))
 
     #####################################################################
     #                       END OF YOUR CODE                            #
