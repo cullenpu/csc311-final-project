@@ -9,25 +9,22 @@ def sigmoid(x):
     return np.exp(x) / (1 + np.exp(x))
 
 
-def neg_log_likelihood(data, theta, beta):
+def neg_log_likelihood(sparse, theta, beta):
     """ Compute the negative log-likelihood.
 
     You may optionally replace the function arguments to receive a matrix.
 
     :param sparse: A 542*1774 sparse matrix representing the data
-    :param data: A dictionary {user_id: list, question_id: list,
-    is_correct: list}
     :param theta: Vector representing the ability of student i
     :param beta: Vector representing the difficulty of problem j
     :return: float
     """
-    log_like = 0.
-    for i in range(len(theta)):
-        for j in range(len(beta)):
-            diff = theta[i] - beta[j]
-            inner_sum = diff - np.log((1 + np.exp(diff)))
-            log_like += inner_sum
-    return -log_like
+    N, M = len(theta), len(beta)
+    theta_matrix = np.reshape(theta, (N, 1)) * np.ones((N, M))
+    beta_matrix = np.transpose(np.reshape(beta, (M, 1)) * np.ones((M, N)))
+    result = sparse.multiply((theta_matrix - beta_matrix) - np.log(1 + np.exp(theta_matrix - beta_matrix)))
+    log_like = np.nansum(result.data)
+    return log_like
 
 
 def get_theta_deriv(theta, beta):
@@ -73,11 +70,12 @@ def update_theta_beta(data, lr, theta, beta):
     return theta, beta
 
 
-def irt(sparse_matrix, data, val_data, lr, iterations):
+def irt(sparse, data, val_data, lr, iterations):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
 
+    :param sparse: A 542*1774 sparse matrix representing the data
     :param data: A dictionary {user_id: list, question_id: list,
     is_correct: list}
     :param val_data: A dictionary {user_id: list, question_id: list,
@@ -86,13 +84,13 @@ def irt(sparse_matrix, data, val_data, lr, iterations):
     :param iterations: int
     :return: (theta, beta, val_acc_lst)
     """
-    theta = np.zeros(sparse_matrix.shape[0])
-    beta = np.zeros(sparse_matrix.shape[1])
+    theta = np.zeros(sparse.shape[0])
+    beta = np.zeros(sparse.shape[1])
 
     val_acc_lst = []
 
     for i in range(iterations):
-        neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
+        neg_lld = neg_log_likelihood(sparse, theta=theta, beta=beta)
         score = evaluate(data=val_data, theta=theta, beta=beta)
         val_acc_lst.append(score)
         print("NLLK: {} \t Score: {}".format(neg_lld, score))
