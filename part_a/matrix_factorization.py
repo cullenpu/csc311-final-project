@@ -187,9 +187,7 @@ def main():
 
     # final runs
     predictions, train_loss, val_loss = als(train_data, val_data, 20, 0.01, 500000)
-    print(len(train_loss))
     iters_range = np.arange(0, 500000, 10000)
-    print(len(iters_range))
     plt.plot(iters_range, train_loss, color='red', label="training")
     plt.plot(iters_range, val_loss, color='blue', label="validation")
     plt.xlabel("num iterations")
