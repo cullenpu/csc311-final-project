@@ -1,6 +1,8 @@
-from utils import *
+from csc311_final_project.utils import *
+# from utils import *
 from pdb import set_trace
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def sigmoid(x):
@@ -47,17 +49,19 @@ def update_theta_beta(data, lr, theta, beta):
     :param beta: Vector
     :return: tuple of vectors
     """
+
     theta_deriv = np.zeros(theta.shape[0])
     beta_deriv = np.zeros(beta.shape[0])
-    for i, c in enumerate(data['is_correct']):
+
+    for i, correct in enumerate(data['is_correct']):
         curr_theta = theta[data['user_id'][i]]
         curr_beta = beta[data['question_id'][i]]
 
-        theta_deriv[data['user_id'][i]] += c - sigmoid(curr_theta - curr_beta)
-        beta_deriv[data['question_id'][i]] += sigmoid(curr_theta - curr_beta) - c
+        theta_deriv[data['user_id'][i]] += (correct - sigmoid(curr_theta - curr_beta))
+        beta_deriv[data['question_id'][i]] += (sigmoid(curr_theta - curr_beta) - correct)
 
-    theta = theta - (lr * theta_deriv)
-    beta = beta - (lr * beta_deriv)
+    theta += (lr * theta_deriv)
+    beta += (lr * beta_deriv)
     return theta, beta
 
 
@@ -78,16 +82,27 @@ def irt(data, val_data, lr, iterations):
     beta = np.zeros(1774)
 
     val_acc_lst = []
+    train_acc_lst = []
+    train_neg_lld_lst = []
+    val_neg_lld_lst = []
+
+    val_score = 0
 
     for i in range(iterations):
         neg_lld = neg_log_likelihood(data, theta=theta, beta=beta)
-        score = evaluate(data=val_data, theta=theta, beta=beta)
-        val_acc_lst.append(score)
-        print("NLLK: {} \t Score: {}".format(neg_lld, score))
+        train_neg_lld_lst.append(neg_lld)
+        neg_lld = neg_log_likelihood(val_data, theta=theta, beta=beta)
+        val_neg_lld_lst.append(neg_lld)
+
+        train_score = evaluate(data=data, theta=theta, beta=beta)
+        train_acc_lst.append(train_score)
+        val_score = evaluate(data=val_data, theta=theta, beta=beta)
+        val_acc_lst.append(val_score)
+
+        print("NLLK: {} \t Score: {}".format(neg_lld, val_score))
         theta, beta = update_theta_beta(data, lr, theta, beta)
 
-    # TODO: You may change the return values to achieve what you want.
-    return theta, beta, val_acc_lst
+    return theta, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score
 
 
 def evaluate(data, theta, beta):
@@ -109,6 +124,17 @@ def evaluate(data, theta, beta):
            / len(data["is_correct"])
 
 
+def plot(num_iterations, training, validation, ylabel, title):
+    iters_range = np.arange(0, num_iterations)
+    plt.plot(iters_range, training, color='red', label="training")
+    plt.plot(iters_range, validation, color='blue', label="validation")
+    plt.xlabel("num iterations")
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.legend()
+    plt.show()
+
+
 def main():
     train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
@@ -116,24 +142,31 @@ def main():
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
 
-    #####################################################################
-    # TODO:                                                             #
-    # Tune learning rate and number of iterations. With the implemented #
-    # code, report the validation and test accuracy.                    #
-    #####################################################################
-    irt(train_data, val_data, 0.05, 100)
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
+    # TEST DIFFERENT NUMBER OF ITERATIONS
+    # num_iterations = [5, 10, 20, 50, 100]
+    # for num in num_iterations:
+    #     print("Number of iterations " + str(num))
+    #     irt(train_data, val_data, 0.01, num)
 
-    #####################################################################
-    # TODO:                                                             #
-    # Implement part (c)                                                #
-    #####################################################################
-    pass
-    #####################################################################
-    #                       END OF YOUR CODE                            #
-    #####################################################################
+    # TEST DIFFERENT LEARNING RATES
+    # learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
+    # for lr in learning_rates:
+    #     print("Learning rate:" + str(lr))
+    #     irt(train_data, val_data, lr, 30)
+
+    num_iterations = 30
+    learning_rate = 0.005
+    theta, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+        irt(train_data, val_data, learning_rate, num_iterations)
+    print("Validation Accuracy: ", final)
+
+    plot(num_iterations, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
+    plot(num_iterations, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
+
+    theta, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+        irt(train_data, test_data, learning_rate, num_iterations)
+    print("Test Accuracy: ", final)
+
 
 
 if __name__ == "__main__":
