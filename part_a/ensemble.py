@@ -2,6 +2,7 @@ from utils import *
 import numpy as np
 from matrix_factorization import *
 
+np.random.seed(311)
 
 def generate_resamples(data, m):
     n = len(data["user_id"])
