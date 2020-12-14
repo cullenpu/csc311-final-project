@@ -1,5 +1,4 @@
-from csc311_final_project.utils import *
-# from utils import *
+from utils import *
 from pdb import set_trace
 import numpy as np
 import matplotlib.pyplot as plt
@@ -135,19 +134,25 @@ def plot(num_iterations, training, validation, ylabel, title):
     plt.show()
 
 
-def plot_question(theta, beta, data):
-    questions = [10, 20, 30, 40, 50]
-    probabilities = []
+def plot_probabilities(beta, data):
+    thetas = np.arange(-5, 6)
+    questions = [20, 40, 60, 80, 100]
+    colors = ['green', 'blue', 'red', 'cyan', 'magenta']
+    color_index = 0
     for q in questions:
-        user = data['user_id'][q]
-        question = data['question_id'][q]
-        prob = sigmoid(theta[user] - beta[question])
-        probabilities.append(prob)
-    plt.plot(questions, probabilities, color='red')
-    plt.xlabel("Question Number")
-    plt.ylabel("probabilities")
-    plt.title("Probabilities of different questions")
+        question = data["question_id"][q]
+        curr = []
+        for theta in thetas:
+            prob = sigmoid(theta - beta[question])
+            curr.append(prob)
+        plt.plot(thetas, curr, color=colors[color_index], label="Question #" + str(q))
+        color_index += 1
+    plt.xlabel("theta")
+    plt.ylabel("probability of correct response")
+    plt.title("Probability of Correct Response Given Question J")
+    plt.legend()
     plt.show()
+
 
 
 def main():
@@ -174,7 +179,7 @@ def main():
     theta, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
         irt(train_data, val_data, learning_rate, num_iterations)
     print("Validation Accuracy: ", final)
-    plot_question(theta, beta, val_data)
+    plot_probabilities(beta, val_data)
 
     plot(num_iterations, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
     plot(num_iterations, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
