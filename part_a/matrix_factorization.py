@@ -4,6 +4,7 @@ from scipy.linalg import sqrtm
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.random.seed(311)
 
 def svd_reconstruct(matrix, k):
     """ Given the matrix, perform singular value decomposition
@@ -92,7 +93,7 @@ def update_u_z(train_data, lr, u, z):
     return u, z
 
 
-def als(train_data, valid_data, k, lr, num_iteration, calculate_losses=True):
+def als(train_data, valid_data, k, lr, num_iteration, calculate_losses=False):
     """ Performs ALS algorithm. Return reconstructed matrix.
 
     :param train_data: A dictionary {user_id: list, question_id: list,
@@ -118,13 +119,13 @@ def als(train_data, valid_data, k, lr, num_iteration, calculate_losses=True):
 
         if calculate_losses:
             if i % 10000 == 0:
-                print("num iter: " + str(i))
+                # print("num iter: " + str(i))
                 sel = squared_error_loss(train_data, u, z)
                 train_losses.append(sel)
-                print("train loss: " + str(sel))
+                # print("train loss: " + str(sel))
                 sel = squared_error_loss(valid_data, u, z)
                 val_losses.append(sel)
-                print("valid loss: " + str(sel))
+                # print("valid loss: " + str(sel))
 
     #####################################################################
     #                       END OF YOUR CODE                            #
@@ -144,16 +145,16 @@ def main():
     # (SVD) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    # k_vals = [1, 5, 10, 20, 50, 100]
-    # results = []
-    # for k in k_vals:
-    #     result_matrix = svd_reconstruct(train_matrix, k)
-    #     results.append(sparse_matrix_evaluate(val_data, result_matrix))
-    # print(results)
-    #
-    # result_matrix = svd_reconstruct(train_matrix, 5)
-    # test_result = (sparse_matrix_evaluate(test_data, result_matrix))
-    # print(test_result)
+    k_vals = [1, 5, 10, 20, 50, 100]
+    results = []
+    for k in k_vals:
+        result_matrix = svd_reconstruct(train_matrix, k)
+        results.append(sparse_matrix_evaluate(val_data, result_matrix))
+    print(results)
+
+    result_matrix = svd_reconstruct(train_matrix, 5)
+    test_result = (sparse_matrix_evaluate(test_data, result_matrix))
+    print("SVD accuracy: ", test_result)
 
     #####################################################################
     #                       END OF YOUR CODE                            #
@@ -163,33 +164,33 @@ def main():
     # (ALS) Try out at least 5 different k and select the best k        #
     # using the validation set.                                         #
     #####################################################################
-    # num_iterations = [10000, 50000, 100000, 200000, 500000, 1000000, 1250000, 1500000]
-    # for num_iters in num_iterations:
-    #     print("num iterations: " + str(num_iters))
-    #     result = als(train_data, 5, 0.01, num_iters)
-    #     test_result = (sparse_matrix_evaluate(val_data, result))
-    #     print(test_result)
+    learning_rates = [0.001, 0.005, 0.01, 0.03, 0.05, 0.1]
+    for lr in learning_rates:
+        print("learning rate: ", lr)
+        result = als(train_data, val_data, 5, lr, int(5e5))[0]
+        test_result = (sparse_matrix_evaluate(val_data, result))
+        print("accuracy: ", test_result)
 
-    # learning_rates = [0.001, 0.005, 0.01, 0.03, 0.05, 0.1, 0.2]
-    # for lr in learning_rates:
-    #     print("learning rate: " + str(lr))
-    #     result = als(train_data, 5, lr, 500000)
-    #     test_result = (sparse_matrix_evaluate(val_data, result))
-    #     print(test_result)
+    num_iterations = [10000, 50000, 100000, 200000, 500000, 1000000]
+    for num_iters in num_iterations:
+        print("num iterations: ", num_iters)
+        result = als(train_data, val_data, 5, 0.01, num_iters)[0]
+        test_result = (sparse_matrix_evaluate(val_data, result))
+        print("accuracy: ", test_result)
 
-    # choose k=20
-    # k_vals = [1, 5, 10, 20, 50, 100]
-    # for k in k_vals:
-    #     print("k: " + str(k))
-    #     result = als(train_data, k, 0.01, 500000)
-    #     test_result = (sparse_matrix_evaluate(val_data, result))
-    #     print(test_result)
+    # choose k = 20
+    k_vals = [1, 5, 10, 20, 50, 100]
+    for k in k_vals:
+        print("k: ", k)
+        result = als(train_data, val_data, k, 0.01, 500000)[0]
+        test_result = (sparse_matrix_evaluate(val_data, result))
+        print("accuracy: ", test_result)
 
     # final runs
-    predictions, train_loss, val_loss = als(train_data, val_data, 20, 0.01, 500000)
-    print(len(train_loss))
+    predictions, train_loss, val_loss = als(train_data, val_data, 50, 0.01, 500000, calculate_losses=True)
+    # print(len(train_loss))
     iters_range = np.arange(0, 500000, 10000)
-    print(len(iters_range))
+    # print(len(iters_range))
     plt.plot(iters_range, train_loss, color='red', label="training")
     plt.plot(iters_range, val_loss, color='blue', label="validation")
     plt.xlabel("num iterations")
@@ -202,9 +203,9 @@ def main():
     val_acc = sparse_matrix_evaluate(val_data, predictions)
     test_acc = sparse_matrix_evaluate(test_data, predictions)
 
-    print("training accuracy: " + str(train_acc))
-    print("validation accuracy: " + str(val_acc))
-    print("test accuracy: " + str(test_acc))
+    print("training accuracy: ", train_acc)
+    print("validation accuracy: ", val_acc)
+    print("test accuracy: ", test_acc)
 
     #####################################################################
     #                       END OF YOUR CODE                            #
