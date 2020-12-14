@@ -135,6 +135,21 @@ def plot(num_iterations, training, validation, ylabel, title):
     plt.show()
 
 
+def plot_question(theta, beta, data):
+    questions = [10, 20, 30, 40, 50]
+    probabilities = []
+    for q in questions:
+        user = data['user_id'][q]
+        question = data['question_id'][q]
+        prob = sigmoid(theta[user] - beta[question])
+        probabilities.append(prob)
+    plt.plot(questions, probabilities, color='red')
+    plt.xlabel("Question Number")
+    plt.ylabel("probabilities")
+    plt.title("Probabilities of different questions")
+    plt.show()
+
+
 def main():
     train_data = load_train_csv("../data")
     # You may optionally use the sparse matrix.
@@ -159,6 +174,7 @@ def main():
     theta, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
         irt(train_data, val_data, learning_rate, num_iterations)
     print("Validation Accuracy: ", final)
+    plot_question(theta, beta, val_data)
 
     plot(num_iterations, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
     plot(num_iterations, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
@@ -166,7 +182,6 @@ def main():
     theta, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
         irt(train_data, test_data, learning_rate, num_iterations)
     print("Test Accuracy: ", final)
-
 
 
 if __name__ == "__main__":
