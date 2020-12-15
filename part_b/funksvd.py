@@ -6,10 +6,10 @@ from utils import *
 
 
 def main():
-    train_matrix = load_train_sparse("./data").toarray()
-    train_data = load_train_csv("./data")
-    val_data = load_valid_csv("./data")
-    test_data = load_public_test_csv("./data")
+    train_matrix = load_train_sparse("../data").toarray()
+    train_data = load_train_csv("../data")
+    val_data = load_valid_csv("../data")
+    test_data = load_public_test_csv("../data")
 
     train_svd = {'u_id': train_data['user_id'], 'i_id': train_data['question_id'], 'rating': train_data['is_correct']}
     val_svd = {'u_id': val_data['user_id'], 'i_id': val_data['question_id'], 'rating': val_data['is_correct']}
