@@ -7,7 +7,8 @@ December 15, 2020
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install required dependencies.
 
 ```bash
-pip install scipy numpy autograd matplotlib jupyter sklearn
+pip install scipy numpy autograd matplotlib jupyter sklearn pandas
+pip install git+https://github.com/gbolmier/funk-svd
 ```
 
 ## Usage

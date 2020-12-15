@@ -163,16 +163,16 @@ def main():
     test_data = load_public_test_csv("../data")
 
     # TEST DIFFERENT NUMBER OF ITERATIONS
-    # num_iterations = [5, 10, 20, 50, 100]
-    # for num in num_iterations:
-    #     print("Number of iterations " + str(num))
-    #     irt(train_data, val_data, 0.01, num)
+    num_iterations = [5, 10, 20, 30, 50, 100]
+    for num in num_iterations:
+        print("Number of iterations " + str(num))
+        irt(train_data, val_data, 0.01, num)
 
     # TEST DIFFERENT LEARNING RATES
-    # learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
-    # for lr in learning_rates:
-    #     print("Learning rate:" + str(lr))
-    #     irt(train_data, val_data, lr, 30)
+    learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
+    for lr in learning_rates:
+        print("Learning rate:" + str(lr))
+        irt(train_data, val_data, lr, 30)
 
     num_iterations = 30
     learning_rate = 0.005
