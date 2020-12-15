@@ -26,7 +26,7 @@ def main():
     predictions = []
     for i in range(m):
         print("m = " + str(i))
-        pred, train_loss, val_loss = als(resamples[i], val_data, 20, 0.01, 500000, calculate_losses=False)
+        pred, train_loss, val_loss = als(resamples[i], val_data, 50, 0.01, 500000)
         predictions.append(pred)
     avg = sum(predictions) / m
     train_acc = sparse_matrix_evaluate(train_data, avg)
