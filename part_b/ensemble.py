@@ -1,3 +1,4 @@
+from part_b.item_response_2PL import irt
 from utils import *
 import numpy as np
 from part_b.funksvd import svd
@@ -46,11 +47,18 @@ def main():
         svd_train_acc.append(train_acc)
         svd_val_acc.append(val_acc)
 
-    # for j in range(m//2, m):
-    #     print("m = " + str(i))
+    irt_train_acc = []
+    irt_val_acc = []
+    for j in range(m//2, m):
+        theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+            irt(train_data, val_data, 0.005, 100)
+        irt_train_acc.append(train_acc[-1])
+        irt_val_acc.append(val_acc[-1])
 
-    avg = sum(svd_val_acc) / (m/2)
-    print(avg)
+    train_avg = (sum(svd_train_acc) + sum(irt_train_acc)) / m
+    val_avg = (sum(svd_val_acc) + sum(irt_val_acc)) / m
+    print("Train Accuracy: ", train_avg)
+    print("Validation Accuracy", val_avg)
 
 
 if __name__ == "__main__":

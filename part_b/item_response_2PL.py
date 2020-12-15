@@ -75,7 +75,7 @@ def update_theta_beta(data, lr, theta, a, beta):
     return theta, a, beta
 
 
-def irt(data, val_data, lr, iterations):
+def irt(data, val_data, lr=0.005, iterations=5):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
