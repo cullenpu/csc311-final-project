@@ -149,7 +149,7 @@ def plot_probabilities(beta, data):
         color_index += 1
     plt.xlabel("theta")
     plt.ylabel("probability of correct response")
-    plt.title("Probability of Correct Response Given Question J")
+    plt.title("Probability of Correct Response vs Theta")
     plt.legend()
     plt.show()
 
