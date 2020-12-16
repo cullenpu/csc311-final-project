@@ -155,26 +155,6 @@ def plot(num_iterations, training, validation, ylabel, title):
     plt.show()
 
 
-def plot_probabilities(beta, a, data):
-    thetas = np.arange(-5, 6)
-    questions = [20, 40, 60, 80, 100]
-    colors = ['green', 'blue', 'red', 'cyan', 'magenta']
-    color_index = 0
-    for q in questions:
-        question = data["question_id"][q]
-        curr = []
-        for theta in thetas:
-            prob = sigmoid(a * (theta - beta[question]))
-            curr.append(prob)
-        plt.plot(thetas, curr, color=colors[color_index], label="Question #" + str(q))
-        color_index += 1
-    plt.xlabel("theta")
-    plt.ylabel("probability of correct response")
-    plt.title("Probability of Correct Response vs Theta")
-    plt.legend()
-    plt.show()
-
-
 def main():
     train_data = load_train_csv("../data")
     val_data = load_valid_csv("../data")
@@ -182,7 +162,6 @@ def main():
 
     # TEST DIFFERENT NUMBER OF ITERATIONS
     num_iterations = [5, 10, 20, 30, 50]
-    num_iterations=[1]
     iters_val_results = []
     for num in num_iterations:
         theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score = irt(train_data, val_data, iterations=num)
@@ -190,7 +169,6 @@ def main():
 
     # TEST DIFFERENT LEARNING RATES
     learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
-    learning_rates=[0.01]
     lr_val_results = []
     for lr in learning_rates:
         theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score = irt(train_data, val_data, lr=lr)
@@ -204,14 +182,13 @@ def main():
     theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
         irt(train_data, val_data, best_lr, best_iter)
     print("Validation Accuracy: ", final)
-    plot_probabilities(beta, a, val_data)
 
-    plot(num_iterations, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
-    plot(num_iterations, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
+    # plot(best_iter, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
+    # plot(best_iter, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
 
-    theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
-        irt(train_data, test_data, best_lr, best_iter)
-    print("Test Accuracy: ", final)
+    # theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+    #     irt(train_data, test_data, best_lr, best_iter)
+    # print("Test Accuracy: ", final)
 
 
 if __name__ == "__main__":
