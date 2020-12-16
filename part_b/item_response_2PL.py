@@ -116,6 +116,18 @@ def irt(data, val_data, lr=0.005, iterations=5):
     return theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score
 
 
+def irt_predict(data, theta, a, beta):
+    pred = []
+    pred_vals = []
+    for i, q in enumerate(data["question_id"]):
+        u = data["user_id"][i]
+        x = (a[q] * (theta[u] - beta[q])).sum()
+        p_a = sigmoid(x)
+        pred.append(p_a >= 0.5)
+        pred_vals.append(p_a)
+    return pred_vals, pred
+
+
 def evaluate(data, theta, a, beta):
     """ Evaluate the model given data and return the accuracy.
     :param data: A dictionary {user_id: list, question_id: list,

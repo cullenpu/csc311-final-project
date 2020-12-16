@@ -24,6 +24,19 @@ def svd(data, svd_data, lr=0.01, reg=0.1, k=10, iters=1000):
     return train_acc, val_acc
 
 
+def svd_predict(data, svd_data, lr=0.01, reg=0.1, k=10, iters=1000):
+    train_data, val_data = data['train_data'], data['val_data']
+    train_svd, val_svd = svd_data['train_svd'], svd_data['val_svd']
+
+    svd = SVD(learning_rate=lr, regularization=reg, n_epochs=iters, n_factors=k, min_rating=0, max_rating=1)
+    svd.fit(X=pd.DataFrame(train_svd), X_val=pd.DataFrame(val_svd), early_stopping=False, shuffle=False)
+
+    # Train Accuracy
+    train_pred = svd.predict(train_svd)
+    # val_pred = svd.predict(train_svd)
+    return train_pred
+
+
 def plot(x_vals, train_y, valid_y, label):
     plt.plot(x_vals, train_y, '--ok', color='red', label="training")
     plt.plot(x_vals, valid_y, '--ok', color='blue', label="validation")
