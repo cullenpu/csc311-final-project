@@ -4,9 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-np.random.seed(311)
-
-
 def sigmoid(x):
     """ Apply sigmoid function.
     """
@@ -75,7 +72,7 @@ def update_theta_beta(data, lr, theta, a, beta):
     return theta, a, beta
 
 
-def irt(data, val_data, lr=0.005, iterations=5):
+def irt(data, val_data, lr=0.01, iterations=10):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
@@ -178,30 +175,34 @@ def plot_probabilities(beta, a, data):
     plt.show()
 
 
-
 def main():
     train_data = load_train_csv("../data")
-    # You may optionally use the sparse matrix.
-    sparse_matrix = load_train_sparse("../data")
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
 
     # TEST DIFFERENT NUMBER OF ITERATIONS
-    num_iterations = [5, 10, 20, 30, 50, 100]
+    num_iterations = [5, 10, 20, 30, 50]
+    num_iterations=[1]
+    iters_val_results = []
     for num in num_iterations:
-        print("Number of iterations " + str(num))
-        irt(train_data, val_data, 0.01, num)
+        theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score = irt(train_data, val_data, iterations=num)
+        iters_val_results.append(val_score)
 
     # TEST DIFFERENT LEARNING RATES
     learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
+    learning_rates=[0.01]
+    lr_val_results = []
     for lr in learning_rates:
-        print("Learning rate:" + str(lr))
-        irt(train_data, val_data, lr, 30)
+        theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score = irt(train_data, val_data, lr=lr)
+        lr_val_results.append(val_score)
 
-    num_iterations = 30
-    learning_rate = 0.005
+    best_iter = num_iterations[iters_val_results.index(max(iters_val_results))]
+    print("Best iterations: ", best_iter)
+    best_lr = learning_rates[lr_val_results.index(max(lr_val_results))]
+    print("Best learning rate: ", best_lr)
+
     theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
-        irt(train_data, val_data, learning_rate, num_iterations)
+        irt(train_data, val_data, best_lr, best_iter)
     print("Validation Accuracy: ", final)
     plot_probabilities(beta, a, val_data)
 
@@ -209,7 +210,7 @@ def main():
     plot(num_iterations, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
 
     theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
-        irt(train_data, test_data, learning_rate, num_iterations)
+        irt(train_data, test_data, best_lr, best_iter)
     print("Test Accuracy: ", final)
 
 

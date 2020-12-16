@@ -21,15 +21,15 @@ def generate_resamples(data, m):
 
 def main():
     # Hyperparameters
-    m = 1  # Number of bootstrap resamples
+    m = 5  # Number of bootstrap resamples
 
-    irt_iters = 1
+    irt_iters = 30
     irt_lr = 0.05
 
     svd_lr = 0.01
     svd_reg = 0.10
+    svd_k = 50
     svd_iters = 500
-    svd_k = 5
 
     train_data = load_train_csv("../data")
     val_data = load_valid_csv("../data")

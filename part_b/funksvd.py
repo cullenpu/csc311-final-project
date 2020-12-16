@@ -6,7 +6,10 @@ from funk_svd import SVD
 from utils import *
 
 
-def svd(data, svd_data, lr=0.01, reg=0.1, k=10, iters=1000):
+np.random.seed(311)
+
+
+def svd(data, svd_data, lr=0.01, reg=0.1, k=10, iters=500):
     train_data, val_data = data['train_data'], data['val_data']
     train_svd, val_svd = svd_data['train_svd'], svd_data['val_svd']
 
@@ -46,10 +49,10 @@ def main():
     data = {"train_data": train_data, "val_data": val_data}
     svd_data = {"train_svd": train_svd, "val_svd": val_svd}
 
-    lrs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
-    regs = [0.001, 0.01, 0.05, 0.08, 0.1, 0.15, 0.5, 0.75, 1]
-    ks = [1, 5, 10, 15, 20, 30, 50, 100]
-    iters = [1, 5, 10, 20, 50, 100, 300, 500, 700, 900, 1000, 2000]
+    lrs = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
+    regs = [0.001, 0.01, 0.05, 0.1, 0.5, 1]
+    ks = [1, 5, 10, 20, 50, 100]
+    iters = [10, 50, 100, 500, 1000, 2000]
 
     lr_train_results = []
     lr_val_results = []
@@ -80,23 +83,21 @@ def main():
         iters_train_results.append(train_result)
         iters_val_results.append(val_result)
 
-    print("LR TRAIN ACCURACIES: ", lr_train_results)
-    print("LR VAL ACCURACIES: ", lr_val_results)
+    best_lr = lrs[lr_val_results.index(max(lr_val_results))]
+    print("Best learning rate: ", best_lr)
+    best_reg = regs[reg_val_results.index(max(reg_val_results))]
+    print("Best regularization value: ", best_reg)
+    best_k = ks[ks_val_results.index(max(ks_val_results))]
+    print("Best k: ", best_k)
+    best_iter = iters[iters_val_results.index(max(iters_val_results))]
+    print("Best iterations: ", best_iter)
+
     plot(lrs, lr_train_results, lr_val_results, "Learning Rates")
-
-    print("REGULARIZER TRAIN ACCURACIES: ", reg_train_results)
-    print("REGULARIZER VAL ACCURACIES: ", reg_val_results)
     plot(regs, reg_train_results, reg_val_results, "Regularized Rates")
-
-    print("K TRAIN ACCURACIES: ", ks_train_results)
-    print("K VAL ACCURACIES: ", ks_val_results)
     plot(ks, ks_train_results, ks_val_results, "K-Values")
-
-    print("ITERS TRAIN ACCURACIES: ", iters_train_results)
-    print("ITERS VAL ACCURACIES: ", iters_val_results)
     plot(iters, iters_train_results, iters_val_results, "Iterations")
 
-    final_svd = SVD(learning_rate=0.01, regularization=0.1, n_epochs=1000, n_factors=10, min_rating=0, max_rating=1)
+    final_svd = SVD(learning_rate=best_lr, regularization=best_reg, n_epochs=best_iter, n_factors=best_k, min_rating=0, max_rating=1)
     final_svd.fit(X=pd.DataFrame(train_svd), X_val=pd.DataFrame(val_svd), early_stopping=False, shuffle=False)
 
     # Train Accuracy
