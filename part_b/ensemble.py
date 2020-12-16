@@ -35,6 +35,7 @@ def main():
     val_data = load_valid_csv("../data")
     test_data = load_public_test_csv("../data")
 
+    train_svd = {'u_id': train_data['user_id'], 'i_id': train_data['question_id'], 'rating': train_data['is_correct']}
     val_svd = {'u_id': val_data['user_id'], 'i_id': val_data['question_id'], 'rating': val_data['is_correct']}
     test_svd = {'u_id': test_data['user_id'], 'i_id': test_data['question_id'], 'rating': test_data['is_correct']}
 
@@ -61,12 +62,11 @@ def main():
         svd = SVD(learning_rate=svd_lr, regularization=svd_reg, n_epochs=svd_iters, n_factors=svd_k, min_rating=0, max_rating=1)
         svd.fit(X=pd.DataFrame(curr_svd), X_val=pd.DataFrame(val_svd), early_stopping=False, shuffle=False)
 
-        svd_train_pred.append(svd.predict(train_data))
+        svd_train_pred.append(svd.predict(train_svd))
         svd_val_pred.append(svd.predict(val_svd))
         svd_test_pred.append(svd.predict(test_svd))
 
     train_avg = np.sum(irt_train_pred + svd_train_pred, axis=0) / (2 * m)
-    print(train_avg)
     val_avg = np.sum(irt_val_pred + svd_val_pred, axis=0) / (2 * m)
     test_avg = np.sum(irt_test_pred + svd_test_pred, axis=0) / (2 * m)
 

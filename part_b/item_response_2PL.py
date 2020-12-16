@@ -183,8 +183,8 @@ def main():
         irt(train_data, val_data, best_lr, best_iter)
     print("Validation Accuracy: ", final)
 
-    # plot(best_iter, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
-    # plot(best_iter, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
+    plot(best_iter, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
+    plot(best_iter, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
 
     # theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
     #     irt(train_data, test_data, best_lr, best_iter)
