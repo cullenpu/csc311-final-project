@@ -2,6 +2,7 @@ from utils import *
 from pdb import set_trace
 import numpy as np
 import matplotlib.pyplot as plt
+np.random.seed(311)
 
 
 def sigmoid(x):
@@ -72,7 +73,7 @@ def update_theta_beta(data, lr, theta, a, beta):
     return theta, a, beta
 
 
-def irt(data, val_data, lr=0.01, iterations=10):
+def irt(data, val_data, lr=0.01, iterations=30):
     """ Train IRT model.
 
     You may optionally replace the function arguments to receive a matrix.
@@ -168,7 +169,7 @@ def main():
         iters_val_results.append(val_score)
 
     # TEST DIFFERENT LEARNING RATES
-    learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2]
+    learning_rates = [0.001, 0.005, 0.009, 0.025, 0.05, 0.1]
     lr_val_results = []
     for lr in learning_rates:
         theta, a, beta, train_acc_lst, val_acc_lst, train_neg_lld_lst, val_neg_lld_lst, val_score = irt(train_data, val_data, lr=lr)
@@ -180,15 +181,19 @@ def main():
     print("Best learning rate: ", best_lr)
 
     theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+        irt(train_data, train_data, best_lr, best_iter)
+    print("Train Accuracy: ", final)
+
+    theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
         irt(train_data, val_data, best_lr, best_iter)
     print("Validation Accuracy: ", final)
 
-    # plot(best_iter, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
-    # plot(best_iter, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
+    plot(best_iter, train_acc, val_acc, "accuracy", "Accuracies vs Num Iterations")
+    plot(best_iter, train_log_likes, val_log_likes, "log likelihood", "Log Likelihoods vs Num Iterations")
 
-    # theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
-    #     irt(train_data, test_data, best_lr, best_iter)
-    # print("Test Accuracy: ", final)
+    theta, a, beta, train_acc, val_acc, train_log_likes, val_log_likes, final = \
+        irt(train_data, test_data, best_lr, best_iter)
+    print("Test Accuracy: ", final)
 
 
 if __name__ == "__main__":

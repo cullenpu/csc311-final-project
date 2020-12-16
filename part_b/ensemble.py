@@ -23,8 +23,8 @@ def main():
     # Hyperparameters
     m = 5  # Number of bootstrap resamples
 
-    irt_iters = 8
-    irt_lr = 0.05
+    irt_iters = 30
+    irt_lr = 0.009
 
     svd_lr = 0.01
     svd_reg = 0.10
@@ -61,12 +61,12 @@ def main():
         svd = SVD(learning_rate=svd_lr, regularization=svd_reg, n_epochs=svd_iters, n_factors=svd_k, min_rating=0, max_rating=1)
         svd.fit(X=pd.DataFrame(curr_svd), X_val=pd.DataFrame(val_svd), early_stopping=False, shuffle=False)
 
-        svd_train_pred.append(svd.predict(train_data))
+        svd_train_pred.append(svd.predict(curr_svd))
         svd_val_pred.append(svd.predict(val_svd))
         svd_test_pred.append(svd.predict(test_svd))
 
     train_avg = np.sum(irt_train_pred + svd_train_pred, axis=0) / (2 * m)
-    print(train_avg)
+    # print(train_avg)
     val_avg = np.sum(irt_val_pred + svd_val_pred, axis=0) / (2 * m)
     test_avg = np.sum(irt_test_pred + svd_test_pred, axis=0) / (2 * m)
 
