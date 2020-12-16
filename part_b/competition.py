@@ -24,7 +24,7 @@ def main():
     m = 5  # Number of bootstrap resamples
 
     irt_iters = 30
-    irt_lr = 0.05
+    irt_lr = 0.009
 
     svd_lr = 0.01
     svd_reg = 0.10
